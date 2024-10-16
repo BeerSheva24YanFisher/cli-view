@@ -13,6 +13,7 @@ public class Menu implements Item {
         this.items = Arrays.copyOf(items, items.length);
         this.name = name;
     }
+    
     public void setSymbol(String symbol) {
         this.symbol = symbol;
     }

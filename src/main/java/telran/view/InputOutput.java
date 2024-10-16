@@ -29,69 +29,77 @@ public interface InputOutput {
 		}while(running);
 		return res;
 	}
-
+	/**
+	 * 
+	 * @param prompt
+	 * @param errorPrompt
+	 * @return Integer number
+	 */
 	default Integer readInt(String prompt, String errorPrompt) {
-		return readObject(prompt, errorPrompt, str -> {
-			int res = Integer.parseInt(str);
-			return res;
-		});
+		// Entered string must be a number otherwise, errorPrompt with cycle
+		return readObject(prompt, errorPrompt, Integer::parseInt);
+
 	}
 
 	default Long readLong(String prompt, String errorPrompt) {
-		return readObject(prompt, errorPrompt, str -> {
-			long res = Long.parseLong(str);
-			return res;
-		});
+		// Entered string must be a number otherwise, errorPrompt with cycle
+		return readObject(prompt, errorPrompt, Long::parseLong);
+
 	}
 
 	default Double readDouble(String prompt, String errorPrompt) {
-		return readObject(prompt, errorPrompt, str -> {
-			double res = Double.parseDouble(str);
-			return res;
-		});
+		// Entered string must be a number otherwise, errorPrompt with cycle
+		return readObject(prompt, errorPrompt, Double::parseDouble);
+
 	}
 
 	default Double readNumberRange(String prompt, String errorPrompt, double min, double max) {
-		return readObject(prompt, errorPrompt, str -> {
-			double res = Double.parseDouble(str);
-			if (res < min || res > max) {
-				throw new IllegalArgumentException("Value must be between " + min + " and " + max);
+		// Entered string must be a number in range (min <= number < max) otherwise,
+		// errorPrompt with cycle
+		return readObject(prompt, errorPrompt,
+				string -> {
+
+			double res = Double.parseDouble(string);
+			if (res < min) {
+				throw new IllegalArgumentException("must be not less than " + min);
+			}
+			if (res > max) {
+				throw new IllegalArgumentException("must be not greater than " + max);
+			}
+			return res;
+
+		});
+	}
+	default String readStringPredicate(String prompt, String errorPrompt,
+			Predicate<String> predicate) {
+		//Entered String must match a given predicate
+		return readObject(prompt, errorPrompt, string -> {
+			if(!predicate.test(string)) {
+				throw new IllegalArgumentException("");
+			}
+			return string;
+		});
+	}
+	default String readStringOptions(String prompt, String errorPrompt,
+			HashSet<String> options) {
+		//Entered String must be one out of a given options
+		return readStringPredicate(prompt, errorPrompt, options::contains);
+	}
+	default LocalDate readIsoDate(String prompt, String errorPrompt) {
+		//Entered String must be a LocalDate in format (yyyy-mm-dd)
+		return readObject(prompt, errorPrompt, LocalDate::parse);
+	}
+	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from,
+			LocalDate to) {
+		//Entered String must be a LocalDate in format (yyyy-mm-dd) in the (from, to)(after from and before to)
+		return readObject(prompt, errorPrompt, string -> {
+			LocalDate res = LocalDate.parse(string);
+			if(!(res.isAfter(from)&& res.isBefore(to))) {
+				throw new IllegalArgumentException
+				(String.format("Date must be after %s before %s", from, to));
 			}
 			return res;
 		});
 	}
 
-	default String readStringPredicate(String prompt, String errorPrompt, Predicate<String> predicate) {
-		return readObject(prompt, errorPrompt, str -> {
-			if (!predicate.test(str)) {
-				throw new IllegalArgumentException("Input doesn't match the required predicate");
-			}
-			return str;
-		});
-	}
-
-	default String readStringOptions(String prompt, String errorPrompt, HashSet<String> options) {
-		return readObject(prompt, errorPrompt, str -> {
-			if (!options.contains(str)) {
-				throw new IllegalArgumentException("Input is not one of the valid options: " + options);
-			}
-			return str;
-		});
-	}
-
-	default LocalDate readIsoDate(String prompt, String errorPrompt) {
-		return readObject(prompt, errorPrompt, str -> {
-			return LocalDate.parse(str);
-		});
-	}
-
-	default LocalDate readIsoDateRange(String prompt, String errorPrompt, LocalDate from, LocalDate to) {
-		return readObject(prompt, errorPrompt, str -> {
-			LocalDate date = LocalDate.parse(str);
-			if (date.isBefore(from) || date.isAfter(to)) {
-				throw new IllegalArgumentException("Date must be between " + from + " and " + to);
-			}
-			return date;
-		});
-	}
 }

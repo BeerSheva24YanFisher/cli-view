@@ -17,7 +17,7 @@ public class Menu implements Item {
         this.nSymbols = nSymbols;
     }
 
-    public Menu(Item... items) {
+    public Menu(String name, Item... items) {
         this.items = Arrays.copyOf(items, items.length);
     }
 

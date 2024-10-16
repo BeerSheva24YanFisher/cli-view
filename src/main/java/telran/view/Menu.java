@@ -17,7 +17,8 @@ public class Menu implements Item {
         this.nSymbols = nSymbols;
     }
 
-    public Menu(String name, Item... items) {
+    public Menu(String nameApp, Item... items) {
+        this.name = nameApp;
         this.items = Arrays.copyOf(items, items.length);
     }
 
@@ -50,6 +51,7 @@ public class Menu implements Item {
     }
 
     private void displayTitle(InputOutput io) {
+        io.writeString()
         io.writeString(symbol.repeat(nSymbols));
         io.writeString(name);
         io.writeLine(symbol.repeat(nSymbols));

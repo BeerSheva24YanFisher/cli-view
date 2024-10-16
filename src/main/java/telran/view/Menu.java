@@ -51,7 +51,6 @@ public class Menu implements Item {
     }
 
     private void displayTitle(InputOutput io) {
-        io.writeString()
         io.writeString(symbol.repeat(nSymbols));
         io.writeString(name);
         io.writeLine(symbol.repeat(nSymbols));

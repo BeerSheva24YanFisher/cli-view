@@ -1,19 +1,24 @@
 package telran.view;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
-public class Menu implements Item{
+public class Menu implements Item {
     String name;
-    List<Item> items;
+    Item[] items;
+    private String symbol = "_";
+    private int nSymbols = 15;
 
-    public Menu(String name) {
-        this.name = name;
-        this.items = new ArrayList<>();
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
-    public void addItem(Item item) {
-        items.add(item);
+    public void setNSymbols(int nSymbols) {
+        this.nSymbols = nSymbols;
+    }
+
+    public Menu(Item... items) {
+        this.items = Arrays.copyOf(items, items.length);
     }
 
     @Override
@@ -23,25 +28,36 @@ public class Menu implements Item{
 
     @Override
     public void perform(InputOutput io) {
-        io.writeLine("====== " + name + " ======");
-        for (int i = 0; i < items.size(); i++) {
-            io.writeLine((i + 1) + ". " + items.get(i).displayName());
-        }
-        io.writeLine("0. Exit");
-    
-        int choice = io.readInt("Choose option", "Invalid option");
-        if (choice > 0 && choice <= items.size()) {
-            items.get(choice - 1).perform(io);
-        }
+        displayTitle(io);
+        boolean running = true;
+        Item item;
+        do {
+            displayItems(io);
+            int itemIndex = io.readNumberRange("Select item", "Wrong item number", 1, items.length).intValue();
+            item = items[itemIndex - 1];
+            try {
+                item.perform(io);
+                running = !item.isExit();
+            } catch (RuntimeException e) {
+                io.writeLine(e.getMessage());
+            }
+        } while (running);
+    }
+
+    private void displayItems(InputOutput io) {
+        IntStream.range(0, items.length)
+                .forEach(i -> io.writeLine(String.format("%d. %s", i + 1, items[i].displayName())));
+    }
+
+    private void displayTitle(InputOutput io) {
+        io.writeString(symbol.repeat(nSymbols));
+        io.writeString(name);
+        io.writeLine(symbol.repeat(nSymbols));
     }
 
     @Override
     public boolean isExit() {
         return false;
-    }
-
-    public void addExitOption() {
-        addItem(Item.ofExit());
     }
 
 }
